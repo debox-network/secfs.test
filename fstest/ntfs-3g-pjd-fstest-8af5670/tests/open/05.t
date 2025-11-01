@@ -6,8 +6,6 @@ desc="open returns EACCES when search permission is denied for a component of th
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
-# # require ownership
-
 echo "1..12"
 
 n0=`namegen`

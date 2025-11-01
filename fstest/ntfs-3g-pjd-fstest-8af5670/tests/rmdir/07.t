@@ -6,8 +6,6 @@ desc="rmdir returns EACCES when search permission is denied for a component of t
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
-# # require ownership
-
 echo "1..10"
 
 n0=`namegen`
