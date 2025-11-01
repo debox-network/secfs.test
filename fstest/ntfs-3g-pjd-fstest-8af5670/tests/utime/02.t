@@ -5,7 +5,11 @@ desc="utime returns EACCES if Search permission is denied for one of the directo
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
-echo "1..30"
+if supported ownership; then
+    echo "1..30"
+else
+    echo "1..26"
+fi
 
 n0=`namegen`
 n1=`namegen`
@@ -32,12 +36,14 @@ test_check $now -le $mtime
 # group has directory access to set to current time
 #
 # 11
-expect 0 utime ${n0}/${n1} $hourback $halfhourback
-expect 0 -u 65533 -g 65534 utime ${n0}/${n1}
-atime=`${fstest} stat ${n0}/${n1} atime`
-test_check $now -le $atime
-mtime=`${fstest} stat ${n0}/${n1} mtime`
-test_check $now -le $mtime
+if supported ownership; then
+    expect 0 utime ${n0}/${n1} $hourback $halfhourback
+    expect 0 -u 65533 -g 65534 utime ${n0}/${n1}
+    atime=`${fstest} stat ${n0}/${n1} atime`
+    test_check $now -le $atime
+    mtime=`${fstest} stat ${n0}/${n1} mtime`
+    test_check $now -le $mtime
+fi
 #
 # not allowed for owner
 #

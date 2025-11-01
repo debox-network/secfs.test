@@ -6,6 +6,8 @@ desc="chown returns ENAMETOOLONG if a component of a pathname exceeded 255 chara
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require ownership
+
 echo "1..5"
 
 expect 0 create ${name255} 0644

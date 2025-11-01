@@ -5,6 +5,8 @@ desc="Darwin resource fork basic testing"
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require xattr
+
 case "${os}" in
 Darwin)
     echo "1..6"

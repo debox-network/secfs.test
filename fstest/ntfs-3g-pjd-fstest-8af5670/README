@@ -5,7 +5,7 @@ Few notes on how to use fstest in short steps:
 	# cd fstest
 	# vi tests/conf
 	Change 'fs' to file system type you want to test. These can be:
-	UFS, ZFS, ext3, ext4, ntfs-3g, xfs, btrfs, glusterfs, secfs.
+	UFS, ZFS, ext3, ext4, ntfs-3g, xfs, btrfs, glusterfs, HFS+, secfs, cgofuse, fskit.
 	# vi Makefile
 	You may need to manually tweak few things by editing CFLAGS lines
 	at the top of the file.
@@ -18,9 +18,8 @@ Few notes on how to use fstest in short steps:
 That's all. Enjoy.
 
 Currently supported operating systems: FreeBSD, Solaris, Linux, Darwin.
-Currently supported file system types: UFS, ZFS, ext3, ext4, ntfs-3g,
-                                       xfs, btrfs, glusterfs, secfs,
-                                       cgofuse.
+Currently supported file system types: UFS, ZFS, ext3, ext4, ntfs-3g, xfs, btrfs,
+                                       glusterfs, HFS+, secfs, cgofuse, fskit.
 
 Author: 
 Pawel Jakub Dawidek <pjd@FreeBSD.org>
@@ -34,3 +33,6 @@ Zorro Lang <zlang@redhat.com>
 
 Darwin/OSXFUSE port:
 Bill Zissimopoulos <billziss at navimatics.com>
+
+Darwin/FSKit port:
+Pavel Denisov <pdenisov@debox.network>

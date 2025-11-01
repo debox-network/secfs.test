@@ -6,6 +6,8 @@ desc="mkfifo returns EFAULT if the path argument points outside the process's al
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require fifo
+
 echo "1..2"
 
 expect EFAULT mkfifo NULL 0644

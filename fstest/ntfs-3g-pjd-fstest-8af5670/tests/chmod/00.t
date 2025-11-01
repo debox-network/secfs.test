@@ -6,11 +6,23 @@ desc="chmod changes permission"
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
-if supported lchmod; then
-	echo "1..125"
-else
-	echo "1..106"
+n=60
+if supported fifo; then
+    n=$((n + 25))
 fi
+if supported ownership; then
+    n=$((n + 17))
+fi
+if supported lchmod; then
+    n=$((n + 15))
+fi
+if supported fifo && supported ownership; then
+    n=$((n + 4))
+fi
+if supported lchmod && supported ownership; then
+    n=$((n + 4))
+fi
+echo "1..$n"
 
 n0=`namegen`
 n1=`namegen`
@@ -32,11 +44,13 @@ expect 0 chmod ${n0} 0753
 expect 0753 stat ${n0} mode
 expect 0 rmdir ${n0}
 # 12
-expect 0 mkfifo ${n0} 0644
-expect 0644 stat ${n0} mode
-expect 0 chmod ${n0} 0310
-expect 0310 stat ${n0} mode
-expect 0 unlink ${n0}
+if supported fifo; then
+    expect 0 mkfifo ${n0} 0644
+    expect 0644 stat ${n0} mode
+    expect 0 chmod ${n0} 0310
+    expect 0310 stat ${n0} mode
+    expect 0 unlink ${n0}
+fi
 
 expect 0 create ${n0} 0644
 expect 0 symlink ${n0} ${n1}
@@ -96,22 +110,24 @@ expect 0 chmod ${n0} 07777
 expect 07777 stat ${n0} mode
 expect 0 rmdir ${n0}
 
-expect 0 mkfifo ${n0} 0644
-expect 0 chmod ${n0} 01111
-expect 01111 stat ${n0} mode
-expect 0 chmod ${n0} 02222
-expect 02222 stat ${n0} mode
-expect 0 chmod ${n0} 03333
-expect 03333 stat ${n0} mode
-expect 0 chmod ${n0} 04444
-expect 04444 stat ${n0} mode
-expect 0 chmod ${n0} 05555
-expect 05555 stat ${n0} mode
-expect 0 chmod ${n0} 06666
-expect 06666 stat ${n0} mode
-expect 0 chmod ${n0} 07777
-expect 07777 stat ${n0} mode
-expect 0 unlink ${n0}
+if supported fifo; then
+    expect 0 mkfifo ${n0} 0644
+    expect 0 chmod ${n0} 01111
+    expect 01111 stat ${n0} mode
+    expect 0 chmod ${n0} 02222
+    expect 02222 stat ${n0} mode
+    expect 0 chmod ${n0} 03333
+    expect 03333 stat ${n0} mode
+    expect 0 chmod ${n0} 04444
+    expect 04444 stat ${n0} mode
+    expect 0 chmod ${n0} 05555
+    expect 05555 stat ${n0} mode
+    expect 0 chmod ${n0} 06666
+    expect 06666 stat ${n0} mode
+    expect 0 chmod ${n0} 07777
+    expect 07777 stat ${n0} mode
+    expect 0 unlink ${n0}
+fi
 
 # successful chmod(2) updates ctime.
 expect 0 create ${n0} 0644
@@ -130,13 +146,15 @@ ctime2=`${fstest} stat ${n0} ctime`
 test_check $ctime1 -lt $ctime2
 expect 0 rmdir ${n0}
 
-expect 0 mkfifo ${n0} 0644
-ctime1=`${fstest} stat ${n0} ctime`
-sleep 1
-expect 0 chmod ${n0} 0310
-ctime2=`${fstest} stat ${n0} ctime`
-test_check $ctime1 -lt $ctime2
-expect 0 unlink ${n0}
+if supported fifo; then
+    expect 0 mkfifo ${n0} 0644
+    ctime1=`${fstest} stat ${n0} ctime`
+    sleep 1
+    expect 0 chmod ${n0} 0310
+    ctime2=`${fstest} stat ${n0} ctime`
+    test_check $ctime1 -lt $ctime2
+    expect 0 unlink ${n0}
+fi
 
 if supported lchmod; then
 	expect 0 symlink ${n1} ${n0}
@@ -149,31 +167,35 @@ if supported lchmod; then
 fi
 
 # unsuccessful chmod(2) does not update ctime.
-expect 0 create ${n0} 0644
-ctime1=`${fstest} stat ${n0} ctime`
-sleep 1
-expect EPERM -u 65534 chmod ${n0} 0111
-ctime2=`${fstest} stat ${n0} ctime`
-test_check $ctime1 -eq $ctime2
-expect 0 unlink ${n0}
+if supported ownership; then
+    expect 0 create ${n0} 0644
+    ctime1=`${fstest} stat ${n0} ctime`
+    sleep 1
+    expect EPERM -u 65534 chmod ${n0} 0111
+    ctime2=`${fstest} stat ${n0} ctime`
+    test_check $ctime1 -eq $ctime2
+    expect 0 unlink ${n0}
 
-expect 0 mkdir ${n0} 0755
-ctime1=`${fstest} stat ${n0} ctime`
-sleep 1
-expect EPERM -u 65534 chmod ${n0} 0753
-ctime2=`${fstest} stat ${n0} ctime`
-test_check $ctime1 -eq $ctime2
-expect 0 rmdir ${n0}
+    expect 0 mkdir ${n0} 0755
+    ctime1=`${fstest} stat ${n0} ctime`
+    sleep 1
+    expect EPERM -u 65534 chmod ${n0} 0753
+    ctime2=`${fstest} stat ${n0} ctime`
+    test_check $ctime1 -eq $ctime2
+    expect 0 rmdir ${n0}
+fi
 
-expect 0 mkfifo ${n0} 0644
-ctime1=`${fstest} stat ${n0} ctime`
-sleep 1
-expect EPERM -u 65534 chmod ${n0} 0310
-ctime2=`${fstest} stat ${n0} ctime`
-test_check $ctime1 -eq $ctime2
-expect 0 unlink ${n0}
+if supported fifo && supported ownership; then
+    expect 0 mkfifo ${n0} 0644
+    ctime1=`${fstest} stat ${n0} ctime`
+    sleep 1
+    expect EPERM -u 65534 chmod ${n0} 0310
+    ctime2=`${fstest} stat ${n0} ctime`
+    test_check $ctime1 -eq $ctime2
+    expect 0 unlink ${n0}
+fi
 
-if supported lchmod; then
+if supported lchmod && supported ownership; then
 	expect 0 symlink ${n1} ${n0}
 	ctime1=`${fstest} lstat ${n0} ctime`
 	sleep 1
@@ -189,25 +211,27 @@ fi
 # (set-group-ID on execution) in the file's mode shall be cleared upon
 # successful return from chmod().
 
-expect 0 create ${n0} 0755
-expect 0 chown ${n0} 65535 65535
-expect 0 -u 65535 -g 65535 chmod ${n0} 02755
-expect 02755 stat ${n0} mode
-expect 0 -u 65535 -g 65535 chmod ${n0} 0755
-expect 0755 stat ${n0} mode
+if supported ownership; then
+    expect 0 create ${n0} 0755
+    expect 0 chown ${n0} 65535 65535
+    expect 0 -u 65535 -g 65535 chmod ${n0} 02755
+    expect 02755 stat ${n0} mode
+    expect 0 -u 65535 -g 65535 chmod ${n0} 0755
+    expect 0755 stat ${n0} mode
 
-# Unfortunately FreeBSD doesn't clear set-gid bit, but returns EPERM instead.
-case "${os}" in
-FreeBSD)
-	expect EPERM -u 65535 -g 65534 chmod ${n0} 02755
-	expect 0755 stat ${n0} mode
-	;;
-*)
-	expect 0 -u 65535 -g 65534 chmod ${n0} 02755
-	expect 0755 stat ${n0} mode
-	;;
-esac
-expect 0 unlink ${n0}
+    # Unfortunately FreeBSD doesn't clear set-gid bit, but returns EPERM instead.
+    case "${os}" in
+    FreeBSD)
+        expect EPERM -u 65535 -g 65534 chmod ${n0} 02755
+        expect 0755 stat ${n0} mode
+        ;;
+    *)
+        expect 0 -u 65535 -g 65534 chmod ${n0} 02755
+        expect 0755 stat ${n0} mode
+        ;;
+    esac
+    expect 0 unlink ${n0}
+fi
 
 cd ${cdir}
 expect 0 rmdir ${n2}

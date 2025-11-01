@@ -6,7 +6,11 @@ desc="truncate descrease/increase file size"
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
-echo "1..21"
+if supported ownership; then
+    echo "1..21"
+else
+    echo "1..17"
+fi
 
 n0=`namegen`
 n1=`namegen`
@@ -39,13 +43,15 @@ test_check $ctime1 -lt $ctime2
 expect 0 unlink ${n0}
 
 # unsuccessful truncate(2) does not update ctime.
-expect 0 create ${n0} 0644
-ctime1=`${fstest} stat ${n0} ctime`
-sleep 1
-expect EACCES -u 65534 truncate ${n0} 123
-ctime2=`${fstest} stat ${n0} ctime`
-test_check $ctime1 -eq $ctime2
-expect 0 unlink ${n0}
+if supported ownership; then
+    expect 0 create ${n0} 0644
+    ctime1=`${fstest} stat ${n0} ctime`
+    sleep 1
+    expect EACCES -u 65534 truncate ${n0} 123
+    ctime2=`${fstest} stat ${n0} ctime`
+    test_check $ctime1 -eq $ctime2
+    expect 0 unlink ${n0}
+fi
 
 cd ${cdir}
 expect 0 rmdir ${n1}

@@ -6,7 +6,11 @@ desc="rename returns EISDIR when the 'to' argument is a directory, but 'from' is
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
-echo "1..17"
+if supported fifo; then
+    echo "1..17"
+else
+    echo "1..12"
+fi
 
 n0=`namegen`
 n1=`namegen`
@@ -19,11 +23,13 @@ expect dir lstat ${n0} type
 expect regular lstat ${n1} type
 expect 0 unlink ${n1}
 
-expect 0 mkfifo ${n1} 0644
-expect EISDIR rename ${n1} ${n0}
-expect dir lstat ${n0} type
-expect fifo lstat ${n1} type
-expect 0 unlink ${n1}
+if supported fifo; then
+    expect 0 mkfifo ${n1} 0644
+    expect EISDIR rename ${n1} ${n0}
+    expect dir lstat ${n0} type
+    expect fifo lstat ${n1} type
+    expect 0 unlink ${n1}
+fi
 
 expect 0 symlink test ${n1}
 expect EISDIR rename ${n1} ${n0}

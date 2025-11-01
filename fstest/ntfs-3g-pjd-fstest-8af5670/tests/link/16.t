@@ -6,6 +6,8 @@ desc="link returns EROFS if the requested link requires writing in a directory o
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require hardlink
+
 case "${os}" in
 FreeBSD)
 	echo "1..9"

@@ -6,6 +6,8 @@ desc="link returns EXDEV if the source and the destination files are on differen
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require hardlink
+
 case "${os}" in
 FreeBSD)
 	echo "1..8"

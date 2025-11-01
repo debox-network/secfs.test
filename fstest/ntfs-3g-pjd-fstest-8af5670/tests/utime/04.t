@@ -5,7 +5,11 @@ desc="utime returns EPERM when setting non-current time by non-owner"
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
-echo "1..13"
+if supported ownership; then
+    echo "1..13"
+else
+    echo "1..7"
+fi
 
 n0=`namegen`
 n1=`namegen`
@@ -21,12 +25,14 @@ expect 0 utime ${n0}/${n1} $hourback $halfhourback
 # not allowed for another user
 #
 # 5
-expect EPERM -u 65533 -g 65533 utime ${n0}/${n1} $now $now
-expect $hourback stat ${n0}/${n1} atime
-expect $halfhourback stat ${n0}/${n1} mtime
-expect EPERM -u 65533 -g 65534 utime ${n0}/${n1} $now $now
-expect $hourback stat ${n0}/${n1} atime
-expect $halfhourback stat ${n0}/${n1} mtime
+if supported ownership; then
+    expect EPERM -u 65533 -g 65533 utime ${n0}/${n1} $now $now
+    expect $hourback stat ${n0}/${n1} atime
+    expect $halfhourback stat ${n0}/${n1} mtime
+    expect EPERM -u 65533 -g 65534 utime ${n0}/${n1} $now $now
+    expect $hourback stat ${n0}/${n1} atime
+    expect $halfhourback stat ${n0}/${n1} mtime
+fi
 #
 # delete
 #

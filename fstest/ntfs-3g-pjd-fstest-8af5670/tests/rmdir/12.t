@@ -26,6 +26,9 @@ Darwin)
     secfs|cgofuse)
     	expect EINVAL rmdir ${n0}/${n1}/..
         ;;
+    fskit)
+        expect 0 rmdir ${n0}/${n1}/..
+        ;;
     *)
     	expect 'ENOTEMPTY' rmdir ${n0}/${n1}/..
     	;;

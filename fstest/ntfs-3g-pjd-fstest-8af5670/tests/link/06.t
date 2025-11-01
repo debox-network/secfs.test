@@ -6,6 +6,9 @@ desc="link returns EACCES when a component of either path prefix denies search p
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require hardlink
+require ownership
+
 echo "1..18"
 
 n0=`namegen`

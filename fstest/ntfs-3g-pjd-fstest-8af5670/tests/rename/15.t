@@ -8,7 +8,11 @@ dir=`dirname $0`
 
 case "${os}" in
 FreeBSD)
-	echo "1..14"
+    if supported fifo; then
+        echo "1..14"
+    else
+        echo "1..11"
+    fi
 
 	n0=`namegen`
 	n1=`namegen`
@@ -27,9 +31,11 @@ FreeBSD)
 	expect EXDEV rename ${n0}/${n1} ${n2}
 	expect 0 rmdir ${n0}/${n1}
 
-	expect 0 mkfifo ${n0}/${n1} 0644
-	expect EXDEV rename ${n0}/${n1} ${n2}
-	expect 0 unlink ${n0}/${n1}
+    if supported fifo; then
+        expect 0 mkfifo ${n0}/${n1} 0644
+        expect EXDEV rename ${n0}/${n1} ${n2}
+        expect 0 unlink ${n0}/${n1}
+    fi
 
 	expect 0 symlink test ${n0}/${n1}
 	expect EXDEV rename ${n0}/${n1} ${n2}

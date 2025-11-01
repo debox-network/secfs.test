@@ -6,6 +6,8 @@ desc="mkfifo returns ENOTDIR if a component of the path prefix is not a director
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require fifo
+
 echo "1..5"
 
 n0=`namegen`

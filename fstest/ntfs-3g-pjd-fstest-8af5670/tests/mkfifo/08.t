@@ -6,6 +6,8 @@ desc="mkfifo returns EROFS if the named file resides on a read-only file system"
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require fifo
+
 case "${os}:${fs}" in
 FreeBSD:UFS)
 	echo "1..7"
