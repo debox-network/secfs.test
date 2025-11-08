@@ -36,7 +36,7 @@ run_getconf()
 }
 
 name_max_val=$(run_getconf NAME_MAX)
-if [ ${fs} == "fskit" ]; then
+if [ "${fs}" = "fskit" ]; then
   path_max_val=1024
 else
   path_max_val=$(run_getconf PATH_MAX)
