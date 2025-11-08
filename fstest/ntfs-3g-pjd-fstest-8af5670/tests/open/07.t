@@ -6,6 +6,8 @@ desc="open returns EACCES when O_TRUNC is specified and write permission is deni
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require ownership
+
 echo "1..23"
 
 n0=`namegen`

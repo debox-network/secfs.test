@@ -6,6 +6,8 @@ desc="link returns EMLINK if the link count of the file named by name1 would exc
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require hardlink
+
 case "${os}:${fs}" in
 FreeBSD:UFS)
 	echo "1..5"

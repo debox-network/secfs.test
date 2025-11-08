@@ -7,6 +7,7 @@ dir=`dirname $0`
 . ${dir}/../misc.sh
 
 require chflags
+require fifo
 
 echo "1..30"
 

@@ -6,6 +6,8 @@ desc="mkfifo returns ENAMETOOLONG if an entire path name exceeded 1023 character
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require fifo
+
 case "${os}:${fs}" in
 Darwin:HFS+|Darwin:cgofuse)
     # This test creates an unremovable file on Darwin:HFS+; so disable it!

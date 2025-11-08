@@ -6,7 +6,13 @@ desc="unlink returns EACCES or EPERM if the directory containing the file is mar
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
-echo "1..33"
+require ownership
+
+if supported fifo; then
+    echo "1..33"
+else
+    echo "1..24"
+fi
 
 n0=`namegen`
 n1=`namegen`
@@ -34,19 +40,21 @@ expect 0 -u 65534 -g 65534 create ${n0}/${n1} 0644
 expect "EACCES|EPERM" -u 65533 -g 65533 unlink ${n0}/${n1}
 expect 0 unlink ${n0}/${n1}
 
-# User owns both: the sticky directory and the fifo to be removed.
-expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n1} 0644
-expect 0 -u 65534 -g 65534 unlink ${n0}/${n1}
-# User owns the fifo to be removed, but doesn't own the sticky directory.
-expect 0 -u 65533 -g 65533 mkfifo ${n0}/${n1} 0644
-expect 0 -u 65533 -g 65533 unlink ${n0}/${n1}
-# User owns the sticky directory, but doesn't own the fifo to be removed.
-expect 0 -u 65533 -g 65533 mkfifo ${n0}/${n1} 0644
-expect 0 -u 65534 -g 65534 unlink ${n0}/${n1}
-# User doesn't own the sticky directory nor the fifo to be removed.
-expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n1} 0644
-expect "EACCES|EPERM" -u 65533 -g 65533 unlink ${n0}/${n1}
-expect 0 unlink ${n0}/${n1}
+if supported fifo; then
+    # User owns both: the sticky directory and the fifo to be removed.
+    expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n1} 0644
+    expect 0 -u 65534 -g 65534 unlink ${n0}/${n1}
+    # User owns the fifo to be removed, but doesn't own the sticky directory.
+    expect 0 -u 65533 -g 65533 mkfifo ${n0}/${n1} 0644
+    expect 0 -u 65533 -g 65533 unlink ${n0}/${n1}
+    # User owns the sticky directory, but doesn't own the fifo to be removed.
+    expect 0 -u 65533 -g 65533 mkfifo ${n0}/${n1} 0644
+    expect 0 -u 65534 -g 65534 unlink ${n0}/${n1}
+    # User doesn't own the sticky directory nor the fifo to be removed.
+    expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n1} 0644
+    expect "EACCES|EPERM" -u 65533 -g 65533 unlink ${n0}/${n1}
+    expect 0 unlink ${n0}/${n1}
+fi
 
 # User owns both: the sticky directory and the symlink to be removed.
 expect 0 -u 65534 -g 65534 symlink test ${n0}/${n1}

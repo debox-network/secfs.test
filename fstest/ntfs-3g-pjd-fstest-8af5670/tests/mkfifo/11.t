@@ -6,6 +6,8 @@ desc="mkfifo returns ENOSPC if there are no free inodes on the file system on wh
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require fifo
+
 case "${os}:${fs}" in
 FreeBSD:UFS)
 	echo "1..3"

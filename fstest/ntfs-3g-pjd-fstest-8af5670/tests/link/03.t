@@ -6,6 +6,8 @@ desc="link returns ENAMETOOLONG if an entire length of either path name exceeded
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require hardlink
+
 case "${os}:${fs}" in
 Darwin:*)
     # This test creates an unremovable file on Darwin:HFS+; so disable it!

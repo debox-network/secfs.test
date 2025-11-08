@@ -6,6 +6,8 @@ desc="link returns ENOSPC if the directory in which the entry for the new link i
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require hardlink
+
 case "${os}:${fs}" in
 FreeBSD:UFS)
 	echo "1..4"

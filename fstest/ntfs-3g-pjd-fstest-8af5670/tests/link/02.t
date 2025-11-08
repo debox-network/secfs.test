@@ -6,6 +6,8 @@ desc="link returns ENAMETOOLONG if a component of either pathname exceeded 255 c
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require hardlink
+
 echo "1..10"
 
 n0=`namegen`

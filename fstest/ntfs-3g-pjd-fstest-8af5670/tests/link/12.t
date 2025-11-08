@@ -7,6 +7,7 @@ dir=`dirname $0`
 . ${dir}/../misc.sh
 
 require chflags
+require hardlink
 
 echo "1..32"
 

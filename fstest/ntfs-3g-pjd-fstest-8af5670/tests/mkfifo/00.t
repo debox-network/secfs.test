@@ -6,7 +6,13 @@ desc="mkfifo creates fifo files"
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
-echo "1..36"
+require fifo
+
+if supported ownership; then
+    echo "1..36"
+else
+    echo "1..25"
+fi
 
 n0=`namegen`
 n1=`namegen`
@@ -37,17 +43,19 @@ expect 0 unlink ${n0}
 # POSIX: The FIFO's user ID shall be set to the process' effective user ID.
 # The FIFO's group ID shall be set to the group ID of the parent directory or to
 # the effective group ID of the process.
-expect 0 chown . 65535 65535
-expect 0 -u 65535 -g 65535 mkfifo ${n0} 0755
-expect 65535,65535 lstat ${n0} uid,gid
-expect 0 unlink ${n0}
-expect 0 -u 65535 -g 65534 mkfifo ${n0} 0755
-expect "65535,6553[45]" lstat ${n0} uid,gid
-expect 0 unlink ${n0}
-expect 0 chmod . 0777
-expect 0 -u 65534 -g 65533 mkfifo ${n0} 0755
-expect "65534,6553[35]" lstat ${n0} uid,gid
-expect 0 unlink ${n0}
+if supported ownership; then
+    expect 0 chown . 65535 65535
+    expect 0 -u 65535 -g 65535 mkfifo ${n0} 0755
+    expect 65535,65535 lstat ${n0} uid,gid
+    expect 0 unlink ${n0}
+    expect 0 -u 65535 -g 65534 mkfifo ${n0} 0755
+    expect "65535,6553[45]" lstat ${n0} uid,gid
+    expect 0 unlink ${n0}
+    expect 0 chmod . 0777
+    expect 0 -u 65534 -g 65533 mkfifo ${n0} 0755
+    expect "65534,6553[35]" lstat ${n0} uid,gid
+    expect 0 unlink ${n0}
+fi
 
 # POSIX: Upon successful completion, mkfifo() shall mark for update the
 # st_atime, st_ctime, and st_mtime fields of the file. Also, the st_ctime and

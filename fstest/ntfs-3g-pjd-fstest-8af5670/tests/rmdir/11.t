@@ -6,6 +6,8 @@ desc="rmdir returns EACCES or EPERM if the directory containing the directory to
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require ownership
+
 echo "1..15"
 
 n0=`namegen`

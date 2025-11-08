@@ -6,7 +6,11 @@ desc="open returns EEXIST when O_CREAT and O_EXCL were specified and the file ex
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
-echo "1..12"
+if supported fifo; then
+    echo "1..12"
+else
+    echo "1..9"
+fi
 
 n0=`namegen`
 
@@ -18,9 +22,11 @@ expect 0 mkdir ${n0} 0755
 expect EEXIST open ${n0} O_CREAT,O_EXCL 0644
 expect 0 rmdir ${n0}
 
-expect 0 mkfifo ${n0} 0644
-expect EEXIST open ${n0} O_CREAT,O_EXCL 0644
-expect 0 unlink ${n0}
+if supported fifo; then
+    expect 0 mkfifo ${n0} 0644
+    expect EEXIST open ${n0} O_CREAT,O_EXCL 0644
+    expect 0 unlink ${n0}
+fi
 
 expect 0 symlink test ${n0}
 expect EEXIST open ${n0} O_CREAT,O_EXCL 0644

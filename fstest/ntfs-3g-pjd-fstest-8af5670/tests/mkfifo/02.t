@@ -6,6 +6,8 @@ desc="mkfifo returns ENAMETOOLONG if a component of a pathname exceeded 255 char
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require fifo
+
 echo "1..3"
 
 expect 0 mkfifo ${name255} 0644

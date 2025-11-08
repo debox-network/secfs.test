@@ -36,7 +36,11 @@ run_getconf()
 }
 
 name_max_val=$(run_getconf NAME_MAX)
-path_max_val=$(run_getconf PATH_MAX)
+if [ "${fs}" = "fskit" ]; then
+  path_max_val=1024
+else
+  path_max_val=$(run_getconf PATH_MAX)
+fi
 
 name_max="_"
 i=1
@@ -141,6 +145,30 @@ supported()
 		fi
         return 1
 		;;
+  fifo)
+    if [ "${fifo:-0}" -eq 1 ]; then
+      return 0
+    fi
+    return 1
+    ;;
+  hardlink)
+    if [ "${hardlink:-0}" -eq 1 ]; then
+      return 0
+    fi
+    return 1
+    ;;
+  ownership)
+    if [ "${ownership:-0}" -eq 1 ]; then
+      return 0
+    fi
+    return 1
+    ;;
+  xattr)
+    if [ "${xattr:-0}" -eq 1 ]; then
+      return 0
+    fi
+    return 1
+    ;;
 	esac
 	return 0
 }

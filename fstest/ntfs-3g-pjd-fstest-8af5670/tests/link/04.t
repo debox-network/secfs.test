@@ -6,6 +6,8 @@ desc="link returns ENOENT if a component of either path prefix does not exist"
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require hardlink
+
 echo "1..6"
 
 n0=`namegen`

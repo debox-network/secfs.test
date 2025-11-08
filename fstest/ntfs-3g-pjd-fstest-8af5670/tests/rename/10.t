@@ -6,6 +6,8 @@ desc="rename returns EACCES or EPERM if the file pointed at by the 'to' argument
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
+require ownership
+
 echo "1..188"
 
 n0=`namegen`
@@ -32,7 +34,11 @@ expect 0 -u 65534 -g 65534 create ${n1}/${n3} 0644
 expect 0 -u 65534 -g 65534 rename ${n0}/${n2} ${n1}/${n3}
 expect ENOENT lstat ${n0}/${n2} inode
 expect ${inode} lstat ${n1}/${n3} inode
-expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n0}/${n2} 0644
+fi
 expect 0 -u 65534 -g 65534 rename ${n1}/${n3} ${n0}/${n2}
 expect ${inode} lstat ${n0}/${n2} inode
 expect ENOENT lstat ${n1}/${n3} inode
@@ -49,7 +55,11 @@ expect 0 -u 65534 -g 65534 create ${n1}/${n3} 0644
 expect 0 -u 65534 -g 65534 rename ${n0}/${n2} ${n1}/${n3}
 expect ENOENT lstat ${n0}/${n2} type
 expect ${inode} lstat ${n1}/${n3} inode
-expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n0}/${n2} 0644
+fi
 expect 0 -u 65534 -g 65534 rename ${n1}/${n3} ${n0}/${n2}
 expect ${inode} lstat ${n0}/${n2} inode
 expect ENOENT lstat ${n1}/${n3} inode
@@ -66,7 +76,11 @@ expect 0 -u 65534 -g 65534 create ${n1}/${n3} 0644
 expect 0 -u 65534 -g 65534 rename ${n0}/${n2} ${n1}/${n3}
 expect ENOENT lstat ${n0}/${n2} type
 expect ${inode} lstat ${n1}/${n3} inode
-expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n0}/${n2} 0644
+fi
 expect 0 -u 65534 -g 65534 rename ${n1}/${n3} ${n0}/${n2}
 expect ${inode} lstat ${n0}/${n2} inode
 expect ENOENT lstat ${n1}/${n3} inode
@@ -116,9 +130,17 @@ expect 0 rmdir ${n1}/${n3}
 
 # User owns both: the sticky directory and the destination file.
 expect 0 chown ${n1} 65534 65534
-expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n0}/${n2} 0644
+fi
 inode=`${fstest} lstat ${n0}/${n2} inode`
-expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n1}/${n3} 0644
+fi
 expect 0 -u 65534 -g 65534 rename ${n0}/${n2} ${n1}/${n3}
 expect ENOENT lstat ${n0}/${n2} inode
 expect ${inode} lstat ${n1}/${n3} inode
@@ -133,9 +155,17 @@ expect ${inode} lstat ${n1}/${n3} inode
 expect 0 unlink ${n1}/${n3}
 # User owns the sticky directory, but doesn't own the destination file.
 expect 0 chown ${n1} 65534 65534
-expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n0}/${n2} 0644
+fi
 inode=`${fstest} lstat ${n0}/${n2} inode`
-expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n1}/${n3} 0644
+fi
 expect 0 -u 65534 -g 65534 rename ${n0}/${n2} ${n1}/${n3}
 expect ENOENT lstat ${n0}/${n2} type
 expect ${inode} lstat ${n1}/${n3} inode
@@ -150,9 +180,17 @@ expect ${inode} lstat ${n1}/${n3} inode
 expect 0 unlink ${n1}/${n3}
 # User owns the destination file, but doesn't own the sticky directory.
 expect 0 chown ${n1} 65533 65533
-expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n0}/${n2} 0644
+fi
 inode=`${fstest} lstat ${n0}/${n2} inode`
-expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n1}/${n3} 0644
+fi
 expect 0 -u 65534 -g 65534 rename ${n0}/${n2} ${n1}/${n3}
 expect ENOENT lstat ${n0}/${n2} type
 expect ${inode} lstat ${n1}/${n3} inode
@@ -167,14 +205,18 @@ expect ${inode} lstat ${n1}/${n3} inode
 expect 0 unlink ${n1}/${n3}
 # User doesn't own the sticky directory nor the destination file.
 expect 0 chown ${n1} 65533 65533
-expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
-expect 0 -u 65533 -g 65533 mkfifo ${n1}/${n3} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n0}/${n2} 0644
+    expect 0 -u 65533 -g 65533 mkfifo ${n1}/${n3} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n0}/${n2} 0644
+    expect 0 -u 65533 -g 65533 create ${n1}/${n3} 0644
+fi
 inode=`${fstest} lstat ${n1}/${n3} inode`
 expect "EACCES|EPERM" -u 65534 -g 65534 rename ${n0}/${n2} ${n1}/${n3}
 expect ${inode} lstat ${n1}/${n3} inode
 expect 0 unlink ${n0}/${n2}
 expect 0 unlink ${n1}/${n3}
-
 # User owns both: the sticky directory and the destination file.
 expect 0 chown ${n1} 65534 65534
 expect 0 -u 65534 -g 65534 symlink test ${n0}/${n2}
@@ -187,7 +229,11 @@ expect 0 -u 65534 -g 65534 create ${n0}/${n2} 0644
 expect 0 -u 65534 -g 65534 rename ${n1}/${n3} ${n0}/${n2}
 expect ${inode} lstat ${n0}/${n2} inode
 expect ENOENT lstat ${n1}/${n3} inode
-expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n1}/${n3} 0644
+fi
 expect 0 -u 65534 -g 65534 rename ${n0}/${n2} ${n1}/${n3}
 expect ENOENT lstat ${n0}/${n2} inode
 expect ${inode} lstat ${n1}/${n3} inode
@@ -204,7 +250,11 @@ expect 0 -u 65534 -g 65534 create ${n0}/${n2} 0644
 expect 0 -u 65534 -g 65534 rename ${n1}/${n3} ${n0}/${n2}
 expect ${inode} lstat ${n0}/${n2} inode
 expect ENOENT lstat ${n1}/${n3} inode
-expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n1}/${n3} 0644
+fi
 expect 0 -u 65534 -g 65534 rename ${n0}/${n2} ${n1}/${n3}
 expect ENOENT lstat ${n0}/${n2} inode
 expect ${inode} lstat ${n1}/${n3} inode
@@ -221,7 +271,11 @@ expect 0 -u 65534 -g 65534 create ${n0}/${n2} 0644
 expect 0 -u 65534 -g 65534 rename ${n1}/${n3} ${n0}/${n2}
 expect ${inode} lstat ${n0}/${n2} inode
 expect ENOENT lstat ${n1}/${n3} inode
-expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+if supported fifo; then
+    expect 0 -u 65534 -g 65534 mkfifo ${n1}/${n3} 0644
+else
+    expect 0 -u 65534 -g 65534 create ${n1}/${n3} 0644
+fi
 expect 0 -u 65534 -g 65534 rename ${n0}/${n2} ${n1}/${n3}
 expect ENOENT lstat ${n0}/${n2} inode
 expect ${inode} lstat ${n1}/${n3} inode

@@ -4,5 +4,11 @@
 # Known operating systems: FreeBSD, SunOS, Linux
 os=`uname`
 
-# Known file systems: UFS, ZFS, ext3, ext4, ntfs-3g, xfs, btrfs, glusterfs, HFS+, secfs, cgofuse
-fs="secfs"
+# Known file systems: UFS, ZFS, ext3, ext4, ntfs-3g, xfs, btrfs, glusterfs, HFS+, secfs, cgofuse, fskit
+fs="ext4"
+
+# Feature flags (1 = supported, 0 = not supported)
+fifo=1
+hardlink=1
+ownership=1
+xattr=0

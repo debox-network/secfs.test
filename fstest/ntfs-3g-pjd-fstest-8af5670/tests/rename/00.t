@@ -6,7 +6,23 @@ desc="rename changes file name"
 dir=`dirname $0`
 . ${dir}/../misc.sh
 
-echo "1..79"
+n=37
+if supported fifo; then
+    n=$((n + 10))
+fi
+if supported hardlink; then
+    n=$((n + 8))
+fi
+if supported ownership; then
+    n=$((n + 12))
+fi
+if supported fifo && supported hardlink; then
+    n=$((n + 8))
+fi
+if supported fifo && supported ownership; then
+    n=$((n + 4))
+fi
+echo "1..$n"
 
 n0=`namegen`
 n1=`namegen`
@@ -23,15 +39,19 @@ inode=`${fstest} lstat ${n0} inode`
 expect 0 rename ${n0} ${n1}
 expect ENOENT lstat ${n0} type,mode,nlink
 expect regular,${inode},0644,1 lstat ${n1} type,inode,mode,nlink
-expect 0 link ${n1} ${n0}
-expect regular,${inode},0644,2 lstat ${n0} type,inode,mode,nlink
-expect regular,${inode},0644,2 lstat ${n1} type,inode,mode,nlink
-expect 0 rename ${n1} ${n2}
-expect regular,${inode},0644,2 lstat ${n0} type,inode,mode,nlink
-expect ENOENT lstat ${n1} type,mode,nlink
-expect regular,${inode},0644,2 lstat ${n2} type,inode,mode,nlink
-expect 0 unlink ${n0}
-expect 0 unlink ${n2}
+if supported hardlink; then
+    expect 0 link ${n1} ${n0}
+    expect regular,${inode},0644,2 lstat ${n0} type,inode,mode,nlink
+    expect regular,${inode},0644,2 lstat ${n1} type,inode,mode,nlink
+    expect 0 rename ${n1} ${n2}
+    expect regular,${inode},0644,2 lstat ${n0} type,inode,mode,nlink
+    expect ENOENT lstat ${n1} type,mode,nlink
+    expect regular,${inode},0644,2 lstat ${n2} type,inode,mode,nlink
+    expect 0 unlink ${n0}
+    expect 0 unlink ${n2}
+else
+    expect 0 unlink ${n1}
+fi
 
 expect 0 mkdir ${n0} 0755
 expect dir,0755 lstat ${n0} type,mode
@@ -41,21 +61,27 @@ expect ENOENT lstat ${n0} type,mode
 expect dir,${inode},0755 lstat ${n1} type,inode,mode
 expect 0 rmdir ${n1}
 
-expect 0 mkfifo ${n0} 0644
-expect fifo,0644,1 lstat ${n0} type,mode,nlink
-inode=`${fstest} lstat ${n0} inode`
-expect 0 rename ${n0} ${n1}
-expect ENOENT lstat ${n0} type,mode,nlink
-expect fifo,${inode},0644,1 lstat ${n1} type,inode,mode,nlink
-expect 0 link ${n1} ${n0}
-expect fifo,${inode},0644,2 lstat ${n0} type,inode,mode,nlink
-expect fifo,${inode},0644,2 lstat ${n1} type,inode,mode,nlink
-expect 0 rename ${n1} ${n2}
-expect fifo,${inode},0644,2 lstat ${n0} type,inode,mode,nlink
-expect ENOENT lstat ${n1} type,mode,nlink
-expect fifo,${inode},0644,2 lstat ${n2} type,inode,mode,nlink
-expect 0 unlink ${n0}
-expect 0 unlink ${n2}
+if supported fifo; then
+    expect 0 mkfifo ${n0} 0644
+    expect fifo,0644,1 lstat ${n0} type,mode,nlink
+    inode=`${fstest} lstat ${n0} inode`
+    expect 0 rename ${n0} ${n1}
+    expect ENOENT lstat ${n0} type,mode,nlink
+    expect fifo,${inode},0644,1 lstat ${n1} type,inode,mode,nlink
+    if supported hardlink; then
+        expect 0 link ${n1} ${n0}
+        expect fifo,${inode},0644,2 lstat ${n0} type,inode,mode,nlink
+        expect fifo,${inode},0644,2 lstat ${n1} type,inode,mode,nlink
+        expect 0 rename ${n1} ${n2}
+        expect fifo,${inode},0644,2 lstat ${n0} type,inode,mode,nlink
+        expect ENOENT lstat ${n1} type,mode,nlink
+        expect fifo,${inode},0644,2 lstat ${n2} type,inode,mode,nlink
+        expect 0 unlink ${n0}
+        expect 0 unlink ${n2}
+    else
+        expect 0 unlink ${n1}
+    fi
+fi
 
 expect 0 create ${n0} 0644
 rinode=`${fstest} lstat ${n0} inode`
@@ -117,24 +143,26 @@ Darwin:*|*:secfs|*:cgofuse)
 esac
 expect 0 rmdir ${n1}
 
-expect 0 mkfifo ${n0} 0644
-ctime1=`${fstest} stat ${n0} ctime`
-sleep 1
-expect 0 rename ${n0} ${n1}
-ctime2=`${fstest} stat ${n1} ctime`
-case "${os}:${fs}" in
-Darwin:*|*:secfs|*:cgofuse)
-    # This test wants ctime of a renamed file to be updated, but POSIX does not require it
-    # and Darwin (and secfs) do not update it!
-    #
-    # See comments above on POSIX note.
-    test_check $ctime1 -le $ctime2
-    ;;
-*)
-    test_check $ctime1 -lt $ctime2
-    ;;
-esac
-expect 0 unlink ${n1}
+if supported fifo; then
+    expect 0 mkfifo ${n0} 0644
+    ctime1=`${fstest} stat ${n0} ctime`
+    sleep 1
+    expect 0 rename ${n0} ${n1}
+    ctime2=`${fstest} stat ${n1} ctime`
+    case "${os}:${fs}" in
+    Darwin:*|*:secfs|*:cgofuse)
+        # This test wants ctime of a renamed file to be updated, but POSIX does not require it
+        # and Darwin (and secfs) do not update it!
+        #
+        # See comments above on POSIX note.
+        test_check $ctime1 -le $ctime2
+        ;;
+    *)
+        test_check $ctime1 -lt $ctime2
+        ;;
+    esac
+    expect 0 unlink ${n1}
+fi
 
 expect 0 symlink ${n2} ${n0}
 ctime1=`${fstest} lstat ${n0} ctime`
@@ -156,37 +184,41 @@ esac
 expect 0 unlink ${n1}
 
 # unsuccessful link(2) does not update ctime.
-expect 0 create ${n0} 0644
-ctime1=`${fstest} stat ${n0} ctime`
-sleep 1
-expect EACCES -u 65534 rename ${n0} ${n1}
-ctime2=`${fstest} stat ${n0} ctime`
-test_check $ctime1 -eq $ctime2
-expect 0 unlink ${n0}
+if supported ownership; then
+    expect 0 create ${n0} 0644
+    ctime1=`${fstest} stat ${n0} ctime`
+    sleep 1
+    expect EACCES -u 65534 rename ${n0} ${n1}
+    ctime2=`${fstest} stat ${n0} ctime`
+    test_check $ctime1 -eq $ctime2
+    expect 0 unlink ${n0}
 
-expect 0 mkdir ${n0} 0755
-ctime1=`${fstest} stat ${n0} ctime`
-sleep 1
-expect EACCES -u 65534 rename ${n0} ${n1}
-ctime2=`${fstest} stat ${n0} ctime`
-test_check $ctime1 -eq $ctime2
-expect 0 rmdir ${n0}
+    expect 0 mkdir ${n0} 0755
+    ctime1=`${fstest} stat ${n0} ctime`
+    sleep 1
+    expect EACCES -u 65534 rename ${n0} ${n1}
+    ctime2=`${fstest} stat ${n0} ctime`
+    test_check $ctime1 -eq $ctime2
+    expect 0 rmdir ${n0}
 
-expect 0 mkfifo ${n0} 0644
-ctime1=`${fstest} stat ${n0} ctime`
-sleep 1
-expect EACCES -u 65534 rename ${n0} ${n1}
-ctime2=`${fstest} stat ${n0} ctime`
-test_check $ctime1 -eq $ctime2
-expect 0 unlink ${n0}
+    if supported fifo; then
+        expect 0 mkfifo ${n0} 0644
+        ctime1=`${fstest} stat ${n0} ctime`
+        sleep 1
+        expect EACCES -u 65534 rename ${n0} ${n1}
+        ctime2=`${fstest} stat ${n0} ctime`
+        test_check $ctime1 -eq $ctime2
+        expect 0 unlink ${n0}
+    fi
 
-expect 0 symlink ${n2} ${n0}
-ctime1=`${fstest} lstat ${n0} ctime`
-sleep 1
-expect EACCES -u 65534 rename ${n0} ${n1}
-ctime2=`${fstest} lstat ${n0} ctime`
-test_check $ctime1 -eq $ctime2
-expect 0 unlink ${n0}
+    expect 0 symlink ${n2} ${n0}
+    ctime1=`${fstest} lstat ${n0} ctime`
+    sleep 1
+    expect EACCES -u 65534 rename ${n0} ${n1}
+    ctime2=`${fstest} lstat ${n0} ctime`
+    test_check $ctime1 -eq $ctime2
+    expect 0 unlink ${n0}
+fi
 
 cd ${cdir}
 expect 0 rmdir ${n3}
